@@ -402,6 +402,8 @@ libexecdir="\${prefix}/libexec"
 includedir="\${prefix}/include"
 sysconfdir="\${prefix}/etc"
 local_statedir="\${prefix}/var"
+installed_tests="no"
+testsdir="\${libexecdir}/installed-tests"
 confsuffix="/qemu"
 slirp="yes"
 oss_lib=""
@@ -1013,6 +1015,12 @@ for opt do
   ;;
   --localstatedir=*) local_statedir="$optarg"
   ;;
+  --enable-installed-tests) installed_tests="yes"
+  ;;
+  --disable-installed-tests) installed_tests="no"
+  ;;
+  --testsdir=*) testsdir="$optarg"
+  ;;
   --firmwarepath=*) firmwarepath="$optarg"
   ;;
   --host=*|--build=*|\
@@ -1595,6 +1603,9 @@ Advanced options (experts only):
   --libexecdir=PATH        install helper binaries in PATH
   --sysconfdir=PATH        install config in PATH$confsuffix
   --localstatedir=PATH     install local state in PATH (set at runtime on win32)
+  --enable-installed-tests enable install tests
+  --disable-installed-tests disable install tests
+  --testsdir=PATH          install tests in PATH [${testsdir}]
   --firmwarepath=PATH      search PATH for firmware files
   --with-confsuffix=SUFFIX suffix for QEMU data inside datadir/libdir/sysconfdir [$confsuffix]
   --with-pkgversion=VERS   use specified string as sub-version of the package
@@ -5955,6 +5966,10 @@ else
 echo "local state directory   queried at runtime"
 echo "Windows SDK       $win_sdk"
 fi
+if test "$installed_tests" = "yes" ; then
+echo "Installed tests enabled"
+echo "Installed tests directory $(eval echo $testsdir)"
+fi
 echo "Source path       $source_path"
 echo "GIT binary        $git"
 echo "GIT submodules    $git_submodules"
@@ -6168,6 +6183,10 @@ if test "$mingw32" = "no" ; then
 fi
 echo "qemu_helperdir=$libexecdir" >> $config_host_mak
 echo "qemu_localedir=$qemu_localedir" >> $config_host_mak
+if test "$installed_tests" = "yes" ; then
+echo "CONFIG_INSTALLED_TESTS=y" >> $config_host_mak
+echo "testsdir=$testsdir" >> $config_host_mak
+fi
 echo "libs_softmmu=$libs_softmmu" >> $config_host_mak
 echo "GIT=$git" >> $config_host_mak
 echo "GIT_SUBMODULES=$git_submodules" >> $config_host_mak
