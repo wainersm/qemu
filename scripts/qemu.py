@@ -228,8 +228,9 @@ class QEMUMachine(object):
         self._qmp = qmp.qmp.QEMUMonitorProtocol(self._vm_monitor,
                                                 server=True)
 
-    def _post_launch(self):
-        self._qmp.accept()
+    def _post_launch(self, qmp_connect=True):
+        if qmp_connect:
+            self._qmp.accept()
 
     def _post_shutdown(self):
         if self._qemu_log_file is not None:
@@ -246,7 +247,7 @@ class QEMUMachine(object):
             shutil.rmtree(self._temp_dir)
             self._temp_dir = None
 
-    def launch(self):
+    def launch(self, auto_qmp_connect=True):
         """
         Launch the VM and make sure we cleanup and expose the
         command line/output in case of exception
@@ -258,7 +259,7 @@ class QEMUMachine(object):
         self._iolog = None
         self._qemu_full_args = None
         try:
-            self._launch()
+            self._launch(auto_qmp_connect)
             self._launched = True
         except:
             self.shutdown()
@@ -270,7 +271,7 @@ class QEMUMachine(object):
                 LOG.debug('Output: %r', self._iolog)
             raise
 
-    def _launch(self):
+    def _launch(self, auto_qmp_connect=True):
         '''Launch the VM and establish a QMP connection'''
         devnull = open(os.path.devnull, 'rb')
         self._pre_launch()
@@ -281,7 +282,7 @@ class QEMUMachine(object):
                                        stdout=self._qemu_log_file,
                                        stderr=subprocess.STDOUT,
                                        shell=False)
-        self._post_launch()
+        self._post_launch(auto_qmp_connect)
 
     def wait(self):
         '''Wait for the VM to power off'''
@@ -460,3 +461,6 @@ class QEMUMachine(object):
                                                  socket.SOCK_STREAM)
             self._console_socket.connect(self._console_address)
         return self._console_socket
+
+    def get_qmp(self):
+        return self._qmp
