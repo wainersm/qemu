@@ -195,15 +195,7 @@ class QEMUMachine(object):
                 self._iolog = iolog.read()
 
     def _base_args(self):
-        if isinstance(self._monitor_address, tuple):
-            moncdev = "socket,id=mon,host=%s,port=%s" % (
-                self._monitor_address[0],
-                self._monitor_address[1])
-        else:
-            moncdev = 'socket,id=mon,path=%s' % self._vm_monitor
-        args = ['-chardev', moncdev,
-                '-mon', 'chardev=mon,mode=control',
-                '-display', 'none', '-vga', 'none']
+        args = ['-display', 'none', '-vga', 'none']
         if self._machine is not None:
             args.extend(['-machine', self._machine])
         if self._console_device_type is not None:
@@ -215,21 +207,35 @@ class QEMUMachine(object):
             args.extend(['-chardev', chardev, '-device', device])
         return args
 
-    def _pre_launch(self):
-        self._temp_dir = tempfile.mkdtemp(dir=self._test_dir)
+    def _setup_qmp(self):
+
         if self._monitor_address is not None:
             self._vm_monitor = self._monitor_address
         else:
             self._vm_monitor = os.path.join(self._temp_dir,
                                             self._name + "-monitor.sock")
-        self._qemu_log_path = os.path.join(self._temp_dir, self._name + ".log")
-        self._qemu_log_file = open(self._qemu_log_path, 'wb')
 
+        if isinstance(self._monitor_address, tuple):
+            moncdev = "socket,id=mon,host=%s,port=%s" % (
+                self._monitor_address[0],
+                self._monitor_address[1])
+        else:
+            moncdev = 'socket,id=mon,path=%s' % self._vm_monitor
+
+        self._args.extend(['-chardev', moncdev, '-mon', 'chardev=mon,mode=control'])
         self._qmp = qmp.qmp.QEMUMonitorProtocol(self._vm_monitor,
                                                 server=True)
 
+    def _pre_launch(self, with_qmp=True):
+        self._temp_dir = tempfile.mkdtemp(dir=self._test_dir)
+        if with_qmp:
+            self._setup_qmp()
+        self._qemu_log_path = os.path.join(self._temp_dir, self._name + ".log")
+        self._qemu_log_file = open(self._qemu_log_path, 'wb')
+
     def _post_launch(self):
-        self._qmp.accept()
+        if self._qmp:
+            self._qmp.accept()
 
     def _post_shutdown(self):
         if self._qemu_log_file is not None:
@@ -246,7 +252,7 @@ class QEMUMachine(object):
             shutil.rmtree(self._temp_dir)
             self._temp_dir = None
 
-    def launch(self):
+    def launch(self, with_qmp=True):
         """
         Launch the VM and make sure we cleanup and expose the
         command line/output in case of exception
@@ -258,7 +264,7 @@ class QEMUMachine(object):
         self._iolog = None
         self._qemu_full_args = None
         try:
-            self._launch()
+            self._launch(with_qmp=with_qmp)
             self._launched = True
         except:
             self.shutdown()
@@ -270,10 +276,10 @@ class QEMUMachine(object):
                 LOG.debug('Output: %r', self._iolog)
             raise
 
-    def _launch(self):
+    def _launch(self, with_qmp=True):
         '''Launch the VM and establish a QMP connection'''
         devnull = open(os.path.devnull, 'rb')
-        self._pre_launch()
+        self._pre_launch(with_qmp)
         self._qemu_full_args = (self._wrapper + [self._binary] +
                                 self._base_args() + self._args)
         self._popen = subprocess.Popen(self._qemu_full_args,
@@ -286,18 +292,22 @@ class QEMUMachine(object):
     def wait(self):
         '''Wait for the VM to power off'''
         self._popen.wait()
-        self._qmp.close()
+        if self._qmp:
+            self._qmp.close()
         self._load_io_log()
         self._post_shutdown()
 
     def shutdown(self):
         '''Terminate the VM and clean up'''
         if self.is_running():
-            try:
-                self._qmp.cmd('quit')
-                self._qmp.close()
-            except:
-                self._popen.kill()
+            if self._qmp:
+                try:
+                    self._qmp.cmd('quit')
+                    self._qmp.close()
+                except:
+                    self._popen.kill()
+            else:
+                self._popen.terminate()
             self._popen.wait()
 
         self._load_io_log()
