@@ -1,0 +1,16 @@
+!mux
+x86_64-q35-kvm:
+    qemu_bin: x86_64-softmmu/qemu-system-x86_64 
+    machine: q35
+    accel: kvm
+    maxcpus_limit: 288
+x86_64-pc-kvm:
+    qemu_bin: x86_64-softmmu/qemu-system-x86_64
+    machine: pc
+    accel: kvm
+    maxcpus_limit: 255
+ppc64-pseries-tcg:
+    qemu_bin: ppc64-softmmu/qemu-system-ppc64
+    machine: pseries
+    accel: tcg
+    maxcpus_limit: 1024
