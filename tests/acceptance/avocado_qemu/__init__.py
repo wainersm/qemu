@@ -52,3 +52,12 @@ class Test(avocado.Test):
     def tearDown(self):
         if self.vm is not None:
             self.vm.shutdown()
+
+    def new_vm(args=None):
+        """
+        Creates a new QEMUMachine.
+
+        @param args: Optional list of QEMU arguments.
+        @return: The QEMUMachine object.
+        """
+        return QEMUMachine(self.qemu_bin, args=args)
