@@ -25,3 +25,11 @@ macos_task:
     - ./configure --python=/usr/local/bin/python3 || { cat config.log; exit 1; }
     - gmake -j$(sysctl -n hw.ncpu)
     - gmake check -j$(sysctl -n hw.ncpu)
+
+fedora_task:
+  container:
+    dockerfile: tests/docker/dockerfiles/fedora.docker
+    cpu: 4
+  script:
+    - ./configure --python=/usr/bin/python3 || { cat config.log; exit 1; }
+    - make -j4
