@@ -190,6 +190,9 @@ matrix:
         - CONFIG="--enable-trace-backends=ust --target-list=x86_64-softmmu"
         - TEST_CMD=""
 
+    - env:
+        - CONFIG="--target-list=ppc64le-softmmu"
+      os: linux-ppc64le
 
     # MacOSX builds
     - env:
