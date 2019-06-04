@@ -14,6 +14,21 @@ def _spawn_vm_checker(accel, qemu_bin):
         raise
     return True
 
+def list_enabled(qemu_bin):
+    """
+    :param qemu_bin: path to the QEMU binary.
+    :type qemu_bin: str
+    :returns: the list of accelerators enabled.
+    :rtype: list
+    """
+    try:
+        vm = QEMUMachine(qemu_bin)
+        vm.set_qmp_monitor(disabled=True)
+        vm.launch()
+        vm.wait()
+    except:
+        raise
+
 def tcg_checker(qemu_bin):
     """ Checks TCG is enabled in the QEMU binary """
     return _spawn_vm_checker("tcg", qemu_bin)
