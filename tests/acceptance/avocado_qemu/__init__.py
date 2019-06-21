@@ -58,8 +58,8 @@ class Test(avocado.Test):
             arch = arches.pop()
         else:
             arch = None
-        self.arch = self.params.get('arch', default=arch)
-        default_qemu_bin = pick_default_qemu_bin(arch=self.arch)
+        param_arch = self.params.get('arch', default=arch)
+        default_qemu_bin = pick_default_qemu_bin(arch=param_arch)
         self.qemu_bin = self.params.get('qemu_bin',
                                         default=default_qemu_bin)
         if self.qemu_bin is None:
