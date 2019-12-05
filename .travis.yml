@@ -269,6 +269,11 @@ matrix:
         - TEST_CMD="make check-acceptance"
       after_failure:
         - cat tests/results/latest/job.log
+      before_script:
+        - mkdir -p /tmp/linux && cd /tmp/linux
+        - wget https://www.kernel.org/pub/linux/kernel/v5.x/linux-5.4.1.tar.gz && tar xvzf linux-5.4.1.tar.gz
+        - cd linux-5.4.1 && make defconfig kvmconfig && echo "CONFIG_PVH=y" > pvh.config && ./scripts/kconfig/merge_config.sh .config pvh.config
+        - make
       addons:
         apt:
           packages:
@@ -277,6 +282,8 @@ matrix:
             - python3.5-venv
             - tesseract-ocr
             - tesseract-ocr-eng
+            # Additional kernel build dependencies
+            - libelf-dev
 
 
     # Using newer GCC with sanitizers
