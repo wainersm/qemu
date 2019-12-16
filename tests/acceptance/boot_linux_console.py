@@ -51,11 +51,7 @@ class BootLinuxConsole(Test):
         os.chdir(cwd)
         return self.workdir + path
 
-    def test_x86_64_pc(self):
-        """
-        :avocado: tags=arch:x86_64
-        :avocado: tags=machine:pc
-        """
+    def do_test_x86_64_pc(self):
         kernel_url = ('https://archives.fedoraproject.org/pub/archive/fedora'
                       '/linux/releases/29/Everything/x86_64/os/images/pxeboot'
                       '/vmlinuz')
@@ -70,6 +66,22 @@ class BootLinuxConsole(Test):
         self.vm.launch()
         console_pattern = 'Kernel command line: %s' % kernel_command_line
         self.wait_for_console_pattern(console_pattern)
+
+    def test_x86_64_pc_kvm(self):
+        """
+        :avocado: tags=arch:x86_64
+        :avocado: tags=machine:pc
+        :avocado: tags=accel:kvm
+        """
+        self.do_test_x86_64_pc()
+
+    def test_x86_64_pc_tcg(self):
+        """
+        :avocado: tags=arch:x86_64
+        :avocado: tags=machine:pc
+        :avocado: tags=accel:tcg
+        """
+        self.do_test_x86_64_pc()
 
     def test_mips_malta(self):
         """
@@ -454,11 +466,7 @@ class BootLinuxConsole(Test):
         console_pattern = 'Kernel command line: %s' % kernel_command_line
         self.wait_for_console_pattern(console_pattern)
 
-    def test_ppc64_pseries(self):
-        """
-        :avocado: tags=arch:ppc64
-        :avocado: tags=machine:pseries
-        """
+    def do_test_ppc64_pseries(self):
         kernel_url = ('https://archives.fedoraproject.org/pub/archive'
                       '/fedora-secondary/releases/29/Everything/ppc64le/os'
                       '/ppc/ppc64/vmlinuz')
@@ -473,6 +481,22 @@ class BootLinuxConsole(Test):
         self.vm.launch()
         console_pattern = 'Kernel command line: %s' % kernel_command_line
         self.wait_for_console_pattern(console_pattern)
+
+    def test_ppc64le_pseries_kvm(self):
+        """
+        :avocado: tags=arch:ppc64
+        :avocado: tags=machine:pseries
+        :avocado: tags=accel:kvm
+        """
+        self.do_test_ppc64le_pseries()
+
+    def test_ppc64le_pseries_tcg(self):
+        """
+        :avocado: tags=arch:ppc64
+        :avocado: tags=machine:pseries
+        :avocado: tags=accel:tcg
+        """
+        self.do_test_ppc64le_pseries()
 
     def test_m68k_q800(self):
         """
