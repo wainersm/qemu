@@ -135,13 +135,14 @@ class QEMUMachine(object):
         self._args.append('-monitor')
         self._args.append('null')
 
-    def add_fd(self, fd, fdset, opaque, opts=''):
+    def add_fd(self, fd, fdset, opaque=None, opts=''):
         """
         Pass a file descriptor to the VM
         """
         options = ['fd=%d' % fd,
-                   'set=%d' % fdset,
-                   'opaque=%s' % opaque]
+                   'set=%d' % fdset]
+        if opaque:
+            options.append('opaque=%s' % opaque)
         if opts:
             options.append(opts)
 
