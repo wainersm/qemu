@@ -94,7 +94,8 @@ before_script:
   - mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
   - ${SRC_DIR}/configure ${BASE_CONFIG} ${CONFIG} || { cat config.log && exit 1; }
 script:
-  - make -j3 && travis_retry ${TEST_CMD}
+  - make -j3; echo $? > ${BUILD_DIR}/build.rc
+  - grep 0 ${BUILD_DIR}/build.rc && travis_retry ${TEST_CMD}
 after_script:
   - if command -v ccache ; then ccache --show-stats ; fi
 
