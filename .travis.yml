@@ -352,6 +352,7 @@ matrix:
 
     - arch: arm64
       dist: xenial
+      sudo: true
       addons:
         apt_packages:
           - libaio-dev
