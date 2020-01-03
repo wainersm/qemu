@@ -2,6 +2,7 @@
 # Additional builds with specific requirements for a full VM need to
 # be added as additional matrix: entries later on
 dist: xenial
+sudo: true
 language: c
 compiler:
   - gcc
@@ -83,6 +84,7 @@ git:
 
 before_script:
   - if command -v ccache ; then ccache --zero-stats ; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] ; then sudo echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6 ; fi
   - mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
   - ${SRC_DIR}/configure ${BASE_CONFIG} ${CONFIG} || { cat config.log && exit 1; }
 script:
