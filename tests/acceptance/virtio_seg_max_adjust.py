@@ -39,6 +39,7 @@ VM_DEV_PARAMS = {'virtio-scsi-pci': ['-device', 'virtio-scsi-pci,id=scsi0'],
                                     '-drive',
                                     'driver=null-co,id=drive0,if=none']}
 
+EXCLUDED_MACHINE_TYPES = ['none', 'isapc', 'microvm']
 
 class VirtioMaxSegSettingsCheck(Test):
     @staticmethod
@@ -89,6 +90,7 @@ class VirtioMaxSegSettingsCheck(Test):
 
     @staticmethod
     def seg_max_adjust_enabled(mt):
+        print(mt)
         # machine types >= 5.0 should have seg_max_adjust = true
         # others seg_max_adjust = false
         mt = mt.split("-")
@@ -109,19 +111,17 @@ class VirtioMaxSegSettingsCheck(Test):
         return False
 
     def test_machine_types(self):
-        # collect all machine types except 'none', 'isapc', 'microvm'
         with QEMUMachine(self.qemu_bin) as vm:
             vm.launch()
             machines = [m['name'] for m in vm.command('query-machines')]
             vm.shutdown()
-        machines.remove('none')
-        machines.remove('isapc')
-        machines.remove('microvm')
 
         for dev_type in DEV_TYPES:
             # create the list of machine types and their parameters.
             mtypes = list()
             for m in machines:
+                if m in EXCLUDED_MACHINE_TYPES:
+                    continue
                 if self.seg_max_adjust_enabled(m):
                     enabled = 'true'
                 else:
