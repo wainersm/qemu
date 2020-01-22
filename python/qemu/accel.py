@@ -16,6 +16,7 @@ accelerators.
 
 import logging
 import os
+import re
 import subprocess
 
 LOG = logging.getLogger(__name__)
@@ -67,6 +68,15 @@ def kvm_available(target_arch=None, qemu_bin=None):
                 return False
     if qemu_bin and "kvm" not in list_accel(qemu_bin):
         return False
+    if os.uname[4] == 'ppc64le':
+        # Additional checks for PowerPC
+        with open('/proc/cpuinfo', 'rb') as cpuinfo:
+            rexp = '^cpu.*POWER\(\d+\).*'
+            for line in cpuinfo:
+                if line.startswith(b'cpu'):
+                    re.matches(rexp)
+                break
+            return False
     return True
 
 def tcg_available(qemu_bin):
