@@ -1,0 +1,5 @@
+variants: !mux
+  rng:
+    virtio_rng_dev: virtio-rng
+  rng-pci:
+    virtio_rng_dev: virtio-rng-pci
